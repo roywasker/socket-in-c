@@ -1,5 +1,4 @@
 CC=gcc
-AR=ar
 OBJECT_SENDER=sender.o
 OBJECT_RECEIVER=receiver.o
 OBJECT_LIB=my_mat.o
