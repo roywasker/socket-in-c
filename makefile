@@ -4,7 +4,7 @@ OBJECT_RECEIVER=receiver.o
 OBJECT_LIB=my_mat.o
 FLAGS= -Wall -g
 
-all: connections receiver
+all: sender receiver
 
 sender: $(OBJECT_MAIN) libmymat.a
 	$(CC) $(FLAGS) -o sender $(OBJECT_SENDER) -lm 
