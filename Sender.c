@@ -79,7 +79,7 @@ void send_file(FILE *fp , int sock){
            printf("peer has closed the TCP connection prior to send.\n");
         }else if (sizeof(data) > bytesSent)
         {
-	        printf("sent only %d bytes from the required %d.\n", sizeof(data), bytesSent);
+	        printf("sent only %ld bytes from the required %d.\n", sizeof(data), bytesSent);
         }
         bzero(data ,SIZE);
     }
