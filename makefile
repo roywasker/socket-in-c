@@ -1,24 +1,24 @@
-CC=gcc
-OBJECT_SENDER=sender.o
-OBJECT_RECEIVER=receiver.o
-OBJECT_LIB=my_mat.o
-FLAGS= -Wall -g
+
 
 all: sender receiver
 
-sender: $(OBJECT_MAIN) libmymat.a
-	$(CC) $(FLAGS) -o sender $(OBJECT_SENDER) -lm 
+sender: sender.c
+	gcc -o sender sender.c
 
-receiver: $(OBJECT_MAIN) libmymat.a
-	$(CC) $(FLAGS) -o receiver $(OBJECT_RECEIVER) -lm 
-
-receiver.o: receiver.c 
-	$(CC) $(FLAGS) -c receiver.c
-
-sender.o: sender.c 
-	$(CC) $(FLAGS) -c sender.c
-
-.PHONY: clean all
+receiver: receiver.c
+	gcc -o receiver receiver.c
 
 clean:
-	rm -f *.o *.a sender receiver
+	rm -f *.o sender receiver
+
+runs:
+	./sender
+
+runr:
+	./receiver
+
+runs-strace:
+	strace -f ./sender
+
+runr-strace:
+	strace -f ./receiver
