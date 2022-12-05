@@ -16,6 +16,7 @@ void write_file(int sock);
 int main(){
 
     int listensocket = -1;
+    char buffer[SIZE];
 
     if((listensocket = socket(AF_INET , SOCK_STREAM , 0 )) == -1)
     {
@@ -68,7 +69,7 @@ int main(){
       
     printf("A new client connection accepted\n");
     
-    write_file(listensocket);
+    write_file(clientSocket);
     printf("successfully write to file\n");
 
     close(listensocket);
@@ -79,7 +80,7 @@ int main(){
 
 void write_file(int sock){
     int recvmess;
-    FILE *fp=NULL;
+    FILE *fp;
     char *filename ="recfile.txt";
     char buffer[SIZE];
 
@@ -103,5 +104,5 @@ void write_file(int sock){
         bzero(buffer ,SIZE);
     }
     fclose(fp);
-    fp=NULL;
+    return;
 }

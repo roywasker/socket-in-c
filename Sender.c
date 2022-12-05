@@ -41,7 +41,7 @@ int main(){
 
     printf("connected to server\n");
 
-    FILE *fp=NULL;
+    FILE *fp;
     char *filename = SENDFILE; 
 
     fp=fopen(filename, "r");
@@ -59,7 +59,6 @@ int main(){
     printf("socket close\n");
 
     fclose(fp);
-    fp=NULL;
     return 0;
 }
 
@@ -75,5 +74,4 @@ void send_file(FILE *fp , int sock){
         }
         bzero(data ,SIZE);
     }
-    
 }
