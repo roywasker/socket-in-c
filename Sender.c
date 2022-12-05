@@ -31,9 +31,9 @@ int main(){
 	}
 
     if (connect(sock, (struct sockaddr *) &serverAddress, sizeof(serverAddress)) == -1)
-     {
-	   printf("connect failed with error code : %d",errno);
-     }
+    {
+	    printf("connect failed with error code : %d",errno);
+    }
 
     printf("connected to server\n");
 
@@ -43,8 +43,6 @@ int main(){
         perror("Can't get filename");
         exit(1);
     }
-
-
     close(sock);
     return 0;
 }
