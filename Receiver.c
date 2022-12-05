@@ -9,6 +9,9 @@
 #include <unistd.h>
 
 #define SERVER_PORT 9999
+#define SIZE 1024
+
+void write_file(int sock);
 
 int main(){
 
@@ -17,8 +20,9 @@ int main(){
     if((listensocket = socket(AF_INET , SOCK_STREAM , 0 )) == -1)
     {
         printf("Could not create listening socket : %d" ,errno);
+        exit(1);
     }
-
+    printf("Sokcet created\n");
     int yes=1; 
     if (setsockopt(listensocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes) == -1)
     { 
@@ -36,7 +40,7 @@ int main(){
     {
         printf("Bind failed with error code : %d" ,errno);
         close(listensocket);
-        return -1;
+        exit(1);
     }
       
     printf("Bind success\n");
@@ -45,27 +49,59 @@ int main(){
 	{	
 	printf("listen failed with error code : %d",errno);
 	    close(listensocket);
-        return -1;
+        exit(1);
     }
 
-    printf("Waiting for incoming TCP-connections...\n");
+    printf("Waiting for incoming TCP-connections\n");
       
     struct sockaddr_in clientAddress;
     socklen_t clientAddressLen = sizeof(clientAddress);
 
+    memset(&clientAddress, 0, sizeof(clientAddress));
+    int clientSocket = accept(listensocket, (struct sockaddr *)&clientAddress, &clientAddressLen);
+
+    if (clientSocket == -1)
+    {
+        printf("listen failed with error code : %d",errno);
+        return -1;
+    }
+      
+    printf("A new client connection accepted\n");
+    
+    write_file(listensocket);
+    printf("successfully write to file\n");
+
+    close(listensocket);
+    printf("socket close\n");
+
+    return 0;
+}
+
+void write_file(int sock){
+    int recvmess;
+    FILE *fp=NULL;
+    char *filename ="recfile.txt";
+    char buffer[SIZE];
+
+    fp=fopen(filename, "w");
+
+    if (fp == NULL)
+    {
+        perror("Can't get filename");
+        exit(1);
+    }
+
     while (1)
     {
-    	memset(&clientAddress, 0, sizeof(clientAddress));
-        clientAddressLen = sizeof(clientAddress);
-        int clientSocket = accept(listensocket, (struct sockaddr *)&clientAddress, &clientAddressLen);
-    	if (clientSocket == -1)
-    	{
-           printf("listen failed with error code : %d",errno);
-           return -1;
-    	}
-      
-    	printf("A new client connection accepted\n");
+        recvmess=recv(sock,buffer ,SIZE ,0);
+        if (recvmess <= 0)
+        {
+           break;
+           return;
+        }
+        fprintf(fp, "%s" ,buffer);
+        bzero(buffer ,SIZE);
     }
-    close(listensocket);
-    return 0;
+    fclose(fp);
+    fp=NULL;
 }
