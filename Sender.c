@@ -9,9 +9,9 @@
 #include <unistd.h>
 
 #define SERVER_PORT 9999
-#define SERVER_IP_ADDRESS "0.0.0.0"
-#define SIZE 1024
-#define SENDFILE "text.txt"
+#define SERVER_IP_ADDRESS "0.0.0.0" 
+#define SIZE 1024 // size of buffer
+#define SENDFILE "text.txt" // the file to send
 
 void send_file(FILE *fp , int sock);
 
@@ -23,6 +23,7 @@ int main(){
         printf("Unable to create a socket : %d",errno);
     }
 
+    //"sockaddr_in" used for IPv4 communication 
     struct sockaddr_in serverAddress;
     memset(&serverAddress, 0, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
@@ -33,7 +34,8 @@ int main(){
 		printf("inet_pton failed");
 		exit(1);
 	}
-
+    
+    // Make a connection to the receiver with socket
     if (connect(sock, (struct sockaddr *) &serverAddress, sizeof(serverAddress)) == -1)
     {
 	    printf("connect failed with error code : %d",errno);
@@ -44,21 +46,21 @@ int main(){
     FILE *fp;
     char *filename = SENDFILE; 
 
-    fp=fopen(filename, "r");
+    fp=fopen(filename, "r"); // open file to send
 
-    if (fp == NULL)
+    if (fp == NULL) // check if the file open successfully
     {
         perror("Can't get filename");
         exit(1);
     }
 
-    send_file(fp,sock);
+    send_file(fp,sock); // sending the file to recevier
     printf("file send successfully\n");
 
-    close(sock);
+    close(sock); // close socket
     printf("socket close\n");
 
-    fclose(fp);
+    fclose(fp); // close file
     return 0;
 }
 
@@ -67,10 +69,17 @@ void send_file(FILE *fp , int sock){
 
     while (fgets(data, SIZE ,fp) != NULL)
     {
-        if (send(sock, data, sizeof(data), 0)== -1)
+        int bytesSent =send(sock, data, sizeof(data), 0);
+        if (bytesSent== -1)
         {
             printf("Error in sending file");
             exit(1);
+        }else if (bytesSent == 0)
+        {
+           printf("peer has closed the TCP connection prior to send.\n");
+        }else if (sizeof(data) > bytesSent)
+        {
+	        printf("sent only %d bytes from the required %d.\n", sizeof(data), bytesSent);
         }
         bzero(data ,SIZE);
     }
