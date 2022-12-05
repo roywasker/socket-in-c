@@ -12,11 +12,11 @@
 #define SERVER_IP_ADDRESS "0.0.0.0" 
 #define SIZE 1024 // size of buffer
 #define SENDFILE "text.txt" // the file to send
+#define authentication 123456
 
 void send_file(FILE *fp , int sock);
 
 int main(){
-
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock==-1)
     {
@@ -54,9 +54,28 @@ int main(){
         exit(1);
     }
 
-    send_file(fp,sock); // sending the file to recevier
-    printf("file send successfully\n");
+    send_file(fp,sock);
+    printf("file send successfully\n"); // sending the file to recevier
 
+    /*char sendagain[3];
+    char exitloop[3];
+
+    do
+    {
+        printf("Send the file again?\n");
+        scanf("%s",sendagain);
+      while (strcmp(sendagain ,"yes")==0)
+    {
+        send_file(fp,sock);
+        printf("file send successfully\n"); // sending the file to recevier
+        printf("Send the file again?\n");
+        scanf("%s",sendagain);
+    }
+    printf("exit ?");
+    scanf("%s",exitloop);
+    } while (strcmp(exitloop ,"yes")==0);*/
+    
+    
     close(sock); // close socket
     printf("socket close\n");
 
@@ -66,10 +85,12 @@ int main(){
 
 void send_file(FILE *fp , int sock){
     char data[SIZE]={0};
+    char buffer[SIZE]={0};
 
     while (fgets(data, SIZE ,fp) != NULL)
     {
-        int bytesSent =send(sock, data, sizeof(data), 0);
+        int bytesSent = send(sock, data, sizeof(data), 0);
+        int revcmess=recv(sock, buffer,sizeof(buffer) ,0);
         if (bytesSent== -1)
         {
             printf("Error in sending file");
