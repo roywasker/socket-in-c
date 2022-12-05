@@ -1,12 +1,11 @@
 
-
 all: sender receiver
 
-sender: sender.c
-	gcc -o sender sender.c
+sender: Sender.c
+	gcc -o sender Sender.c
 
-receiver: receiver.c
-	gcc -o receiver receiver.c
+receiver: Receiver.c
+	gcc -o receiver Receiver.c
 
 clean:
 	rm -f *.o sender receiver
@@ -16,9 +15,3 @@ runs:
 
 runr:
 	./receiver
-
-runs-strace:
-	strace -f ./sender
-
-runr-strace:
-	strace -f ./receiver
