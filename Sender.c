@@ -86,7 +86,6 @@ int main(){
 void send_file(FILE *fp , int sock){
     char data[SIZE]={0};
     char buffer[SIZE]={0};
-
     while (fgets(data, SIZE ,fp) != NULL)
     {
         int bytesSent = send(sock, data, sizeof(data), 0);
