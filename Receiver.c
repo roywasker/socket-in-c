@@ -47,6 +47,25 @@ int main(){
 	    close(listensocket);
         return -1;
     }
-    
+
+    printf("Waiting for incoming TCP-connections...\n");
+      
+    struct sockaddr_in clientAddress;
+    socklen_t clientAddressLen = sizeof(clientAddress);
+
+    while (1)
+    {
+    	memset(&clientAddress, 0, sizeof(clientAddress));
+        clientAddressLen = sizeof(clientAddress);
+        int clientSocket = accept(listensocket, (struct sockaddr *)&clientAddress, &clientAddressLen);
+    	if (clientSocket == -1)
+    	{
+           printf("listen failed with error code : %d",errno);
+           return -1;
+    	}
+      
+    	printf("A new client connection accepted\n");
+    }
+    close(listensocket);
     return 0;
 }
