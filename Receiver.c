@@ -9,11 +9,12 @@
 #include <unistd.h>
 
 #define SERVER_PORT 9999 //The port that the receiver listens
-#define SIZE 1024 //size of buffer
 #define id1 7084 
-#define id1 0383
+#define id2 383
 
-void write_file(int sock);
+void rec_file(int sock);
+
+long sizefile;
 
 int main(){
 
@@ -73,8 +74,8 @@ int main(){
     }
       
     printf("A new client connection accepted\n");
-    
-    write_file(clientSocket); // receive the file 
+    int recvmess = recv(clientSocket,sizefile ,sizeof(long) ,0);
+    rec_file(clientSocket); // receive the file 
     printf("successfully write to file\n");
 
     close(listensocket); // close socket with sender
@@ -83,31 +84,18 @@ int main(){
     return 0;
 }
 
-void write_file(int sock){
+void rec_file(int sock){
     int recvmess;
-    FILE *fp;
-    char *filename ="recfile.txt";
-    char buffer[SIZE];
-
-    fp=fopen(filename, "w");
-
-    if (fp == NULL)
-    {
-        perror("Can't get filename");
-        exit(1);
-    }
-
+    char buffer [sizefile];
     while (1)
     {
-        recvmess=recv(sock,buffer ,SIZE ,0);
+        recvmess=recv(sock,buffer ,sizefile ,0);
         if (recvmess <= 0)
         {
            break;
            return;
         }
-        fprintf(fp, "%s" ,buffer);
-        bzero(buffer ,SIZE);
+        bzero(buffer ,sizefile);
     }
-    fclose(fp);
     return;
 }
