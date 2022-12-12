@@ -10,6 +10,8 @@
 
 #define SERVER_PORT 9999 //The port that the receiver listens
 #define SIZE 1024 //size of buffer
+#define id1 7084 
+#define id1 0383
 
 void write_file(int sock);
 

@@ -12,7 +12,8 @@
 #define SERVER_IP_ADDRESS "0.0.0.0" 
 #define SIZE 1024 // size of buffer
 #define SENDFILE "text.txt" // the file to send
-#define authentication 123456
+#define id1 7084
+#define id1 0383
 
 void send_file(FILE *fp , int sock);
 
