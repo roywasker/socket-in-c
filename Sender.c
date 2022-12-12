@@ -79,10 +79,11 @@ int main(){
     char ch;
     do
     {   
-        char ccalgo[7]="cublic";
+        char ccalgo[7];
+        strcpy(ccalgo,"cubic");
         if (setsockopt(sock, IPPROTO_TCP,TCP_CONGESTION, ccalgo, strlen(ccalgo)) != 0)
         {
-            printf("Error in change cc algo");
+            printf("Error in change cc algo first time\n");
             exit(1);
         }
         
@@ -106,10 +107,10 @@ int main(){
         }else{
             send_file(message,sock); // send the first part 
         }
-        char ccalgo[7]="reno";
+        strcpy(ccalgo,"reno");
         if (setsockopt(sock, IPPROTO_TCP,TCP_CONGESTION, ccalgo, strlen(ccalgo)) != 0)
         {
-            printf("Error in change cc algo");
+            printf("Error in change cc algo second time\n");
             exit(1);
         }
         send_file(message+(sizefile/2),sock); // send the second part 
