@@ -63,20 +63,35 @@ int main(){
 
     printf("connected to server\n");
 
+    char mesofsizefile[sizeof(sizefile)];
+    sprintf(mesofsizefile, "%ld", sizefile);
+    long bytesSent = send(sock, mesofsizefile, sizeof(mesofsizefile) ,0);
+    if (bytesSent== -1)
+    {
+        printf("Error in sending size of file");
+        exit(1);
+    }else if (bytesSent == 0)
+    {
+        printf("peer has closed the TCP connection prior to send.\n");
+    }
+
     send_file(message,sock); // send the first part 
 
+    printf("first part of file send successfully\n");
+
     char auth[sizeof(char)*16];
-    char temp [sizeof(char)*16] ={0};
+    char temp [sizeof(char)*16] ="roy";
     calculateauthentication(temp);
     recv(sock,auth,sizeof(auth),0);
     if (strcmp(auth,temp)==0)
     {
-        printf("auth successfully");
+        printf("authentication successfully\n");
     }else{
-        printf("auth not successfully");
+        printf("authentication not successfully\n");
     }
-    
     send_file(message+(sizefile/2),sock); // send the second part 
+
+    printf("second part of file send successfully\n");
     
     close(sock); // close socket
     printf("socket close\n");
@@ -100,8 +115,6 @@ void send_file(char *mes, int sock){
     }else if (finish > bytesSent)
     {
 	    printf("sent only %ld bytes from the required %d.\n",bytesSent,finish);
-    }else{
-        printf("file send successfully\n");
     }
 }
 long get_file_len(FILE *fp){

@@ -13,6 +13,8 @@
 #define id2 383
 
 void rec_file(int sock);
+void sendauthentication(int);
+void calculateauthentication(char temp[]);
 
 long sizefile;
 
@@ -81,7 +83,7 @@ int main(){
     sizefile=strtol(size,&p,10);
 
     rec_file(clientSocket); // receive the file 
-    printf("successfully write to file\n");
+    printf("successfully write to first file\n");
 
     close(listensocket); // close socket with sender
     printf("socket close\n");
@@ -92,15 +94,43 @@ int main(){
 void rec_file(int sock){
     int recvmess;
     char buffer [sizefile];
-    while (1)
+    recvmess=recv(sock,buffer ,sizefile ,0);
+    if (recvmess <= 0)
     {
-        recvmess=recv(sock,buffer ,sizefile ,0);
-        if (recvmess <= 0)
-        {
-           break;
-           return;
-        }
-        bzero(buffer ,sizefile);
+        return;
     }
-    return;
+    bzero(buffer ,sizefile);
+    sendauthentication(sock);
+}
+void sendauthentication(int sock){
+    char authentication[sizeof(sizefile)];
+    calculateauthentication(authentication);
+    printf("%s-------------------------\n",authentication);
+    long bytesSent = send(sock, authentication, sizeof(authentication) ,0);
+    if (bytesSent== -1)
+    {
+        printf("Error in sending authentication");
+        exit(1);
+    }else if (bytesSent == 0)
+    {
+        printf("peer has closed the TCP connection prior to send.\n");
+    }
+}
+long dectobin(int dec) {
+    long bin = 0;
+    int rem, i = 1;
+    while (dec!=0) {
+        rem = dec % 2;
+        dec /= 2;
+        bin += rem * i;
+        i *= 10;
+  }
+  return bin;
+}
+void calculateauthentication(char temp[]){
+    long idf=dectobin(id1);
+    long ids =dectobin(id2);
+    char xorid[sizeof(char)*16];
+    sprintf(xorid, "%ld", idf^ids);
+    strcpy(temp,xorid);
 }
