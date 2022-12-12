@@ -78,9 +78,9 @@ int main(){
 
     printf("first part of file send successfully\n");
 
-    char auth[4];
-    char temp [4];
-    sprintf(temp, "%ld", id1^id2);
+    char auth[5];
+    char temp [5];
+    sprintf(temp, "%d", id1^id2);
     recv(sock,auth,sizeof(auth),0);
     if (strcmp(auth,temp)==0)
     {

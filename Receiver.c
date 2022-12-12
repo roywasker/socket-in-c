@@ -102,8 +102,8 @@ void rec_file(int sock){
     sendauthentication(sock);
 }
 void sendauthentication(int sock){
-    char authentication[4];
-    sprintf(authentication, "%ld", id1^id2);
+    char authentication[5];
+    sprintf(authentication, "%d", id1^id2);
     long bytesSent = send(sock, authentication, sizeof(authentication) ,0);
     if (bytesSent== -1)
     {
