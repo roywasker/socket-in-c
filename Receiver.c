@@ -14,7 +14,6 @@
 
 void rec_file(int sock);
 void sendauthentication(int);
-void calculateauthentication(char temp[]);
 
 long sizefile;
 
@@ -103,9 +102,8 @@ void rec_file(int sock){
     sendauthentication(sock);
 }
 void sendauthentication(int sock){
-    char authentication[sizeof(sizefile)];
-    calculateauthentication(authentication);
-    printf("%s-------------------------\n",authentication);
+    char authentication[4];
+    sprintf(authentication, "%ld", id1^id2);
     long bytesSent = send(sock, authentication, sizeof(authentication) ,0);
     if (bytesSent== -1)
     {
@@ -115,22 +113,4 @@ void sendauthentication(int sock){
     {
         printf("peer has closed the TCP connection prior to send.\n");
     }
-}
-long dectobin(int dec) {
-    long bin = 0;
-    int rem, i = 1;
-    while (dec!=0) {
-        rem = dec % 2;
-        dec /= 2;
-        bin += rem * i;
-        i *= 10;
-  }
-  return bin;
-}
-void calculateauthentication(char temp[]){
-    long idf=dectobin(id1);
-    long ids =dectobin(id2);
-    char xorid[sizeof(char)*16];
-    sprintf(xorid, "%ld", idf^ids);
-    strcpy(temp,xorid);
 }

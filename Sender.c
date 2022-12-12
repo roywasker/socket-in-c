@@ -16,7 +16,6 @@
 
 void send_file(char [], int sock);
 long get_file_len(FILE *fp);
-void calculateauthentication(char temp[]);
 
 int main(){
     FILE *fp;
@@ -79,9 +78,9 @@ int main(){
 
     printf("first part of file send successfully\n");
 
-    char auth[sizeof(char)*16];
-    char temp [sizeof(char)*16] ="roy";
-    calculateauthentication(temp);
+    char auth[4];
+    char temp [4];
+    sprintf(temp, "%ld", id1^id2);
     recv(sock,auth,sizeof(auth),0);
     if (strcmp(auth,temp)==0)
     {
@@ -125,22 +124,4 @@ long get_file_len(FILE *fp){
     fseek (fp,0,SEEK_END);  //move file pointer to end of file
     size= ftell(fp); //calculate the size of the file
     return size;
-}
-long dectobin(int dec) {
-    long bin = 0;
-    int rem, i = 1;
-    while (dec!=0) {
-        rem = dec % 2;
-        dec /= 2;
-        bin += rem * i;
-        i *= 10;
-  }
-  return bin;
-}
-void calculateauthentication(char temp[]){
-    long idf=dectobin(id1);
-    long ids =dectobin(id2);
-    char xorid[sizeof(char)*16];
-    sprintf(xorid, "%ld", idf^ids);
-    strcpy(temp,xorid);
 }
