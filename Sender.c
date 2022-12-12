@@ -89,7 +89,7 @@ void send_file(char *mes, int sock){
     int finish = strlen(mes)/2;
     int countbit=0;
     
-    long bytesSent = send(sock, mes, sizeof(finish), 0);
+    long bytesSent = send(sock, mes, finish, 0);
     if (bytesSent== -1)
     {
         printf("Error in sending file");
@@ -97,9 +97,9 @@ void send_file(char *mes, int sock){
     }else if (bytesSent == 0)
     {
         printf("peer has closed the TCP connection prior to send.\n");
-    }else if (sizeof(mes) > bytesSent)
+    }else if (finish > bytesSent)
     {
-	    printf("sent only %ld bytes from the required %ld.\n",bytesSent,sizeof(mes));
+	    printf("sent only %ld bytes from the required %d.\n",bytesSent,finish);
     }else{
         printf("file send successfully\n");
     }
