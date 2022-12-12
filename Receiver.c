@@ -74,7 +74,12 @@ int main(){
     }
       
     printf("A new client connection accepted\n");
-    int recvmess = recv(clientSocket,sizefile ,sizeof(long) ,0);
+
+    char size[10]={0};
+    int recvmess = recv(clientSocket,size ,sizeof(size) ,0);
+    char *p;
+    sizefile=strtol(size,&p,10);
+
     rec_file(clientSocket); // receive the file 
     printf("successfully write to file\n");
 

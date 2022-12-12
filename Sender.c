@@ -85,11 +85,11 @@ int main(){
     return 0;
 }
 
-void send_file(char mes[] , int sock){
+void send_file(char *mes, int sock){
     int finish = strlen(mes)/2;
     int countbit=0;
     
-    int bytesSent = send(sock, mes, sizeof(finish), 0);
+    long bytesSent = send(sock, mes, sizeof(finish), 0);
     if (bytesSent== -1)
     {
         printf("Error in sending file");
@@ -99,7 +99,7 @@ void send_file(char mes[] , int sock){
         printf("peer has closed the TCP connection prior to send.\n");
     }else if (sizeof(mes) > bytesSent)
     {
-	    printf("sent only %ld bytes from the required %d.\n",bytesSent,sizeof(mes));
+	    printf("sent only %ld bytes from the required %ld.\n",bytesSent,sizeof(mes));
     }else{
         printf("file send successfully\n");
     }
@@ -127,5 +127,7 @@ long dectobin(int dec) {
 void calculateauthentication(char temp[]){
     long idf=dectobin(id1);
     long ids =dectobin(id2);
-    strcpy(temp,idf^ids);
+    char xorid[sizeof(char)*16];
+    sprintf(xorid, "%ld", idf^ids);
+    strcpy(temp,xorid);
 }
