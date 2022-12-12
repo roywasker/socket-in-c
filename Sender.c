@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h> 
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <unistd.h>
 
 #define SERVER_PORT 9999
@@ -16,6 +17,7 @@
 
 void send_file(char [], int sock);
 long get_file_len(FILE *fp);
+int checkauthentication(int sock);
 
 int main(){
     FILE *fp;
@@ -74,24 +76,75 @@ int main(){
         printf("peer has closed the TCP connection prior to send.\n");
     }
 
-    send_file(message,sock); // send the first part 
+    char ch;
+    do
+    {   
+        char ccalgo[7]="cublic";
+        if (setsockopt(sock, IPPROTO_TCP,TCP_CONGESTION, ccalgo, strlen(ccalgo)) != 0)
+        {
+            printf("Error in change cc algo");
+            exit(1);
+        }
+        
+        send_file(message,sock); // send the first part 
+        printf("first part of file send successfully\n");
 
-    printf("first part of file send successfully\n");
+        /*char auth[5];
+        char temp [5];
+        sprintf(temp, "%d", id1^id2);
+        recv(sock,auth,sizeof(auth),0);
+        if (strcmp(auth,temp)==0)
+        {
+            printf("authentication successfully\n");
+        }else{
+            printf("authentication not successfully\n");
+        }*/
+        int cheaut=checkauthentication(sock);
+        if (cheaut ==1)
+        {
+            printf("authentication successfully\n");
+        }else{
+            send_file(message,sock); // send the first part 
+        }
+        char ccalgo[7]="reno";
+        if (setsockopt(sock, IPPROTO_TCP,TCP_CONGESTION, ccalgo, strlen(ccalgo)) != 0)
+        {
+            printf("Error in change cc algo");
+            exit(1);
+        }
+        send_file(message+(sizefile/2),sock); // send the second part 
 
-    char auth[5];
-    char temp [5];
-    sprintf(temp, "%d", id1^id2);
-    recv(sock,auth,sizeof(auth),0);
-    if (strcmp(auth,temp)==0)
-    {
-        printf("authentication successfully\n");
-    }else{
-        printf("authentication not successfully\n");
-    }
-    send_file(message+(sizefile/2),sock); // send the second part 
+        cheaut=checkauthentication(sock);
+        if (cheaut ==1)
+        {
+            printf("authentication successfully\n");
+        }else{
+            send_file(message+(sizefile/2),sock); // send the second part 
+        }
 
-    printf("second part of file send successfully\n");
-    
+        printf("second part of file send successfully\n");
+        printf("Exit? y to yes or n to no\n");
+        char ch2;
+        scanf("%c",&ch2);
+        if (ch2=='y'||ch2=='Y')
+        {   
+            char exitmess[]="exit";
+            int bytesSent = send(sock, exitmess, sizeof(exitmess) ,0);
+            if (bytesSent== -1)
+            {
+                printf("Error in sending size of file");
+                exit(1);
+            }else if (bytesSent == 0)
+            {
+                printf("peer has closed the TCP connection prior to send.\n");
+            }
+            break;
+        }
+           
+        printf("Send the file again? y to yes or n to no\n");
+        scanf("%c",&ch);
+    } while (ch=='y'||ch=='Y');
+
     close(sock); // close socket
     printf("socket close\n");
 
@@ -124,4 +177,15 @@ long get_file_len(FILE *fp){
     fseek (fp,0,SEEK_END);  //move file pointer to end of file
     size= ftell(fp); //calculate the size of the file
     return size;
+}
+int checkauthentication(int sock){
+    char auth[5];
+    char temp [5];
+    sprintf(temp, "%d", id1^id2);
+    recv(sock,auth,sizeof(auth),0);
+    if (strcmp(auth,temp)==0)
+    {
+       return 1;
+    }
+    return 0;
 }
