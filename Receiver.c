@@ -158,7 +158,7 @@ int main(int argc, char const *argv[])
 	}
 	printf("exit message arrived\n\n");
 	close(listensocket); // close socket with sender
-	printf("socket close\n");
+	printf("socket close\n\n");
 
 	printf("total avarage time =  %f\n", totaltime/countmessarrive);
 
