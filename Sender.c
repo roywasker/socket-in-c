@@ -16,8 +16,8 @@
 #define id1 7084
 #define id2 383 // 4 last dig is 0383
 
-long get_file_len(FILE *fp);
 int checkauthentication(int sock);
+long SizeFile=1048580 ; 
 
 int main(int argc, char const *argv[])
 {
@@ -31,100 +31,80 @@ int main(int argc, char const *argv[])
         perror("Can't get filename");
         exit(1);
     }
-    long sizefile = get_file_len(fp);
+    
+    char message[SizeFile];
 
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    fread(message,sizeof(char),SizeFile,fp); // insert the file in to the string
+
+    fclose(fp); // close the file
+    int sock = socket(AF_INET, SOCK_STREAM, 0); // create socket
     if (sock == -1)
     {
         printf("Unable to create a socket : %d", errno);
+        exit(1);
     }
 
     //"sockaddr_in" used for IPv4 communication
     struct sockaddr_in serverAddress;
-    memset(&serverAddress, 0, sizeof(serverAddress));
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(PORT);
-    int rval = inet_pton(AF_INET, (const char *)SERVER_IP_ADDRESS, &serverAddress.sin_addr);
+    memset(&serverAddress, 0, sizeof(serverAddress)); // file struct with 0
+    serverAddress.sin_family = AF_INET; // work with ipv4
+    serverAddress.sin_port = htons(PORT); // insert to struct the port 
+    int rval = inet_pton(AF_INET, (const char *)SERVER_IP_ADDRESS, &serverAddress.sin_addr);//convert the address to binary
     if (rval <= 0)
     {
         printf("inet_pton failed");
         exit(1);
     }
 
-    // Make a connection to the receiver with socket
-    if (connect(sock, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == -1)
+    if (connect(sock, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == -1) // Make a connection to the receiver with socket
     {
         printf("connect failed with error code : %d", errno);
     }
 
     printf("connected to server\n\n");
 
-    char mesofsizefile[sizeof(sizefile)];
-    sprintf(mesofsizefile, "%ld", sizefile);
-    long bytesSent = send(sock, mesofsizefile, sizeof(mesofsizefile), 0);
-    if (bytesSent == -1)
-    {
-        printf("Error in sending size of file");
-        exit(1);
-    }
-    else if (bytesSent == 0)
-    {
-        printf("peer has closed the TCP connection prior to send.\n");
-    }
     while (1)
     {
         char ccalgo[7] = "reno";
-        if (setsockopt(sock, IPPROTO_TCP, TCP_CONGESTION, ccalgo, strlen(ccalgo)) != 0)
+        if (setsockopt(sock, IPPROTO_TCP, TCP_CONGESTION, ccalgo, strlen(ccalgo)) != 0) //change cc algorithm to reno
         {
-            printf("Error in change cc reno\n");
+            printf("Error in change cc algorithm to reno\n");
             exit(1);
         }
         else
         {
-            printf("change cc algo to reno \n\n");
+            printf("change cc algorithm to reno \n\n");
         }
-        char buffer[sizefile / 2];
-        fp = fopen(filename, "r");
-        long b = 0;
-        long bytesSent = 0;
-        long sizefiletosend = sizefile / 2;
-        long bytesLeft = sizefiletosend;
-        while ((b = fread(buffer, 1, bytesLeft, fp)) > 0)
+        long BytesSent = 0; // countig how much byte are send to recevier
+        long SizeFileToSend = SizeFile / 2; // amont of half file
+        long BytesLeft = SizeFileToSend; // intialize how much byte left to send
+        while (BytesSent<SizeFileToSend)
         {
-            int sendmess = send(sock, buffer, b, 0); // int bytesSent = send(sock, buffer, sizeof(buffer), 0);
-            if (-1 == sendmess)
+            int SendMess = send(sock, message+BytesSent,BytesLeft, 0); // send message to reciver 
+            if (-1 == SendMess)
             {
                 printf("Error in sending file: %d", errno);
             }
-            else if (0 == sendmess)
+            else if (0 == SendMess)
             {
                 printf("peer has closed the TCP connection prior to send().\n");
             }
-            else if (b > sendmess) //(sizeof(buffer) > bytesSent)
-            {
-                printf("sent only %d bytes from the required %ld.\n", sendmess, b); // printf("sent only %d bytes from the required %d.\n", bytesSent, sizeof(buffer));
-            }
-            else
-            {
-                // printf("Message was successfully sent. Send %d bytes: \n", bytesSent);
-            }
-            bytesSent += sendmess;
-            bytesLeft -= sendmess;
+            BytesSent += SendMess; // add the number of byte that arrive to recevier
+            BytesLeft -= SendMess; // subtraction the number of byte that arrive recevier
         }
-        printf("Send %ld bytes of file.\n", bytesSent);
+        printf("Send %ld bytes of file.\n", BytesSent); // print how much byte send to recevier
         printf("first part of file send successfully\n");
 
-        int cheaut = checkauthentication(sock);
+        int cheaut = checkauthentication(sock); // cheack authentication
 
-        if (cheaut == 1)
+        if (cheaut == 1) // retun 1 if the authentication is correct
         {
             printf("authentication for first part are successfully\n\n\n");
+        }else{
+            break;
         }
-        else
-        {
-        }
-        char ccalgo2[7] = "cubic";
-        if (setsockopt(sock, IPPROTO_TCP, TCP_CONGESTION, ccalgo2, strlen(ccalgo2)) != 0)
+        char ccalgo2[7] = "cubic"; 
+        if (setsockopt(sock, IPPROTO_TCP, TCP_CONGESTION, ccalgo2, strlen(ccalgo2)) != 0) //change cc algorithm to cubic
         {
             printf("Error in change cc algo\n");
             exit(1);
@@ -133,70 +113,56 @@ int main(int argc, char const *argv[])
         {
             printf("change cc algo to cubic \n\n");
         }
-        b = 0;
-        bytesSent = 0;
-        sizefiletosend = sizefile / 2;
-        bytesLeft = sizefiletosend;
-        bzero(buffer, sizeof(buffer));
-        while ((b = fread(buffer, 1, bytesLeft, fp)) > 0)
-        { // while(fgets(buffer, sizeof(buffer), fp1) != NULL) {
-            //	send(sock, buffer, b, 0);
-            int sendmess = send(sock, buffer, b, 0); // int bytesSent = send(sock, buffer, sizeof(buffer), 0);
-            if (-1 == sendmess)
+        BytesSent = 0; // countig how much byte are send to recevier
+        BytesLeft = SizeFileToSend; // intialize how much byte left to send
+        while (BytesSent< SizeFileToSend)
+        { 
+            int SendMess = send(sock,message+BytesSent+SizeFile/2,BytesLeft, 0); //send message to reciver 
+            if (-1 == SendMess)
             {
                 printf("Error in sending file: %d", errno);
             }
-            else if (0 == sendmess)
+            else if (0 == SendMess)
             {
                 printf("peer has closed the TCP connection prior to send().\n");
             }
-            else if (b > sendmess) //(sizeof(buffer) > bytesSent)
-            {
-                printf("sent only %d bytes from the required %ld.\n", sendmess, b); // printf("sent only %d bytes from the required %d.\n", bytesSent, sizeof(buffer));
-            }
-            else
-            {
-                // printf("Message was successfully sent. Send %d bytes: \n", bytesSent);
-            }
-            bytesSent += sendmess;
-            bytesLeft -= sendmess;
+            BytesSent += SendMess; // add the number of byte that arrive recevier
+            BytesLeft -= SendMess; // subtraction the number of byte that arrive recevier
         }
-        printf("Send %ld bytes of file.\n", bytesSent);
+        printf("Send %ld bytes of file.\n", BytesSent); // print how much byte send to recevier
         printf("second part of file send successfully\n");
 
-        cheaut = checkauthentication(sock);
+        cheaut = checkauthentication(sock); // cheack authentication
 
         if (cheaut == 1)
         {
             printf("authentication for second part are successfully\n\n\n");
+        }else{
+            break;
         }
-        else
-        {
-        }
-        fclose(fp);
         char ch1 , ch2 ;
-        printf("Send the file again? y to yes or n to no\n");
+        printf("Send the file again? y to yes or n to no\n"); //check if send file again
         ch2 = getchar();
         getchar();
-        if (ch2 == 'n'||ch2 == 'N')
+        if (ch2 == 'n'||ch2 == 'N') // if no check if exit
         {
             printf("exit? y to yes or n to no\n");
             ch1 = getchar();
             getchar();
-            if (ch1 == 'y'||ch1 == 'Y')
+            if (ch1 == 'y'||ch1 == 'Y') //if exit 
             {
-                char exitmess[] = "exit";
-                int bytesSent = send(sock, exitmess, sizeof(exitmess), 0);
-                if (bytesSent == -1)
+                char ExitMess[] = "exit";
+                int BytesSent = send(sock, ExitMess, sizeof(ExitMess), 0); // send exit message to recevier
+                if (BytesSent == -1)
                 {
                     printf("Error in sending size of file");
                     exit(1);
                 }
-                else if (bytesSent == 0)
+                else if (BytesSent == 0)
                 {
                     printf("peer has closed the TCP connection prior to send.\n");
                 }
-                break;
+                break; // break loop
             }
         }
         else if (ch2 == 'y')
@@ -204,29 +170,18 @@ int main(int argc, char const *argv[])
             continue;
         }
     }
-    printf("\nclose soket\n");
-    close(sock);
+    printf("\nclose soket\n"); 
+    close(sock); // close soket 
     return 0;
-}
-long get_file_len(FILE *fp)
-{
-    long size = 0;
-    if (fp == NULL)
-    { // check if the file open successfully
-        return 0;
-    }
-    fseek(fp, 0, SEEK_END); // move file pointer to end of file
-    size = ftell(fp);       // calculate the size of the file
-    return size;
 }
 
 int checkauthentication(int sock)
 {
     // receive the authentication code from the server
     char auth[5];
-    char temp[5];
-    sprintf(temp, "%d", id1 ^ id2);
-    int bytes = recv(sock, auth, sizeof(auth), 0);
+    char XorIds[5];
+    sprintf(XorIds, "%d", id1 ^ id2); // insert to temp id1 xor id2
+    int bytes = recv(sock, auth, sizeof(auth), 0); // recving the authentication form reciver 
     if (bytes == -1)
     {
         printf("Error in receiving authentication code\n");
@@ -237,7 +192,7 @@ int checkauthentication(int sock)
         printf("peer has closed the TCP connection prior to receive.\n");
         exit(1);
     }
-    if (strcmp(auth, temp) == 0)
+    if (strcmp(auth, XorIds) == 0) //cheack if the authentication from reciver is equal to id1 xor id2
     {
         return 1;
     }
