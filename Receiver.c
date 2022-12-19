@@ -77,7 +77,7 @@ int main(int argc, char const *argv[])
 	}
 
 	printf("A new client connection accepted\n\n");
-	
+	double times[100]; // assuming that send the file not over the 50 times
 	while (1)
 	{
 		char ccalgo[7]="reno";
@@ -104,12 +104,12 @@ int main(int argc, char const *argv[])
 		}
 		clock_t end = clock(); // stop measure time
 		double time= (double)(end - start)/CLOCKS_PER_SEC; // calculating the time to take the file to arrive 
-		CountMessArrive++; 
+		times[CountMessArrive++]=time;
 		TotalTime += time; // add time to total time 
 		if(strcmp(buffer,"exit")==0){ // check if get exit message
 			break;
 		}
-		printf("Received byte: %ld in %f seconds \n\n", BytesReceived,time); // print how much byte arrive the how much time its take  
+		printf("Received  %ld bytes\n\n", BytesReceived); // print how much byte arrive the how much time its take  
 		sendauthentication(ClientSocket); // send authentication
 
 		char ccalgo2[7]="cubic";
@@ -137,16 +137,25 @@ int main(int argc, char const *argv[])
 		}
 		end = clock();// stop measure time
 		time= (double)(end - start)/CLOCKS_PER_SEC; // calculating the time to take the file to arrive 
-		CountMessArrive++;
+		times[CountMessArrive++]=time;
 		TotalTime += time; // add time to total time 
-		printf("Received byte: %ld in %f seconds \n\n", BytesReceived,time);	 // print how much byte arrive the how much time its take  
+		printf("Received %ld byte\n\n", BytesReceived);	 // print how much byte arrive the how much time its take  
 		sendauthentication(ClientSocket); // send authentication
 		
 	}
 	printf("\nexit message arrived\n\n");
 	close(listenSocket); // close socket with sender
 	printf("socket close\n");
-
+	double TimeForFirstPart=0,TimeForSecondPart=0;
+	for (int i = 0; i <CountMessArrive; i=i+2)
+	{
+		TimeForFirstPart+=times[i];
+		TimeForSecondPart+=times[i+1];
+		printf("time to receive first part in %d time is : %f",(i/2)+1,times[i]); //print how much time its take to receive the part of file each send
+		printf("time to receive first second in %d time is : %f",(i/2)+1,times[i+1]); //print how much time its take to receive the part of file each send
+	}
+	printf("total avarage time for firts part =  %f\n", TimeForFirstPart/((CountMessArrive)/2)); // print avarage time
+	printf("total avarage time for second part =  %f\n", TimeForSecondPart/((CountMessArrive)/2)); // print avarage time
 	printf("total avarage time =  %f\n", TotalTime/CountMessArrive); // print avarage time
 
 	return 0;
