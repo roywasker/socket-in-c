@@ -20,7 +20,7 @@ long SizeFile=1048580;
 
 void sendauthentication(int);
 
-int main(int argc, char const *argv[])
+int main()
 {
 	int listenSocket = -1; // create listening socket
 	if ((listenSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -143,16 +143,17 @@ int main(int argc, char const *argv[])
 		sendauthentication(ClientSocket); // send authentication
 		
 	}
+	CountMessArrive--; // because exit message
 	printf("\nexit message arrived\n\n");
 	close(listenSocket); // close socket with sender
-	printf("socket close\n");
+	printf("socket close\n\n");
 	double TimeForFirstPart=0,TimeForSecondPart=0;
 	for (int i = 0; i <CountMessArrive; i=i+2)
 	{
 		TimeForFirstPart+=times[i];
 		TimeForSecondPart+=times[i+1];
-		printf("time to receive first part in %d time is : %f",(i/2)+1,times[i]); //print how much time its take to receive the part of file each send
-		printf("time to receive first second in %d time is : %f",(i/2)+1,times[i+1]); //print how much time its take to receive the part of file each send
+		printf("time to receive first part in %d time is : %f\n",(i/2)+1,times[i]); //print how much time its take to receive the part of file each send
+		printf("time to receive second part in %d time is : %f\n",(i/2)+1,times[i+1]); //print how much time its take to receive the part of file each send
 	}
 	printf("total avarage time for firts part =  %f\n", TimeForFirstPart/((CountMessArrive)/2)); // print avarage time
 	printf("total avarage time for second part =  %f\n", TimeForSecondPart/((CountMessArrive)/2)); // print avarage time
