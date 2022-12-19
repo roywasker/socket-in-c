@@ -14,7 +14,7 @@
 #define SERVER_IP_ADDRESS "0.0.0.0"
 #define SENDFILE "text.txt" // the file to send
 #define id1 7084
-#define id2 383 // 4 last dig is 0383
+#define id2 383 // first dig is 0 so 0383
 
 int checkauthentication(int sock);
 long SizeFile=1048580 ; 
