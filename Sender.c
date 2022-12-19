@@ -19,7 +19,7 @@
 int checkauthentication(int sock);
 long SizeFile=1048580 ; 
 
-int main(int argc, char const *argv[])
+int main()
 {
     FILE *fp;
     char *filename = SENDFILE;

@@ -20,7 +20,7 @@ long SizeFile=1048580;
 
 void sendauthentication(int);
 
-int main(int argc, char const *argv[])
+int main()
 {
 	int listenSocket = -1; // create listening socket
 	if ((listenSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
