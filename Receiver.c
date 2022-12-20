@@ -108,9 +108,7 @@ int main()
 		double time=(end.tv_sec - start.tv_sec)+(end.tv_usec-start.tv_usec)*1e-6; // calculating the time to take the file to arrive 
 		times[CountMessArrive++]=time;
 		TotalTime += time; // add time to total time 
-		if(strcmp(buffer,"exit")==0){ // check if get exit message
-			break;
-		}
+
 		printf("Received  %ld bytes\n\n", BytesReceived); // print how much byte arrive the how much time its take  
 		sendauthentication(ClientSocket); // send authentication
 
@@ -124,7 +122,7 @@ int main()
 		}
 
 		BytesLeft = SizeFile / 2; // intialize how much byte left to received
-		buffer[SizeFile / 2];
+		memset(&buffer, 0, sizeof(buffer));
 		BytesReceived = 0;// countig how much byte received from sender
 		gettimeofday(&start,0); // start measure time
 		while (BytesReceived < SizeFile/2)
