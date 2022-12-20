@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/types.h> 
-#include <time.h>
+#include <sys/time.h>
 
 #define SERVER_PORT 9999 // The port that the receiver listens
 #define id1 7084
@@ -91,7 +91,8 @@ int main()
 		long BytesLeft = SizeFile/2; // intialize how much byte left to received
 		char buffer[SizeFile /2];
 		long BytesReceived = 0; // countig how much byte received from sender
-		clock_t start = clock(); // start measure time
+		struct timeval start; 
+		gettimeofday(&start,0); // start measure time
 		while (BytesReceived < SizeFile/2)
 		{
 			int MessRecv = recv(ClientSocket, buffer, BytesLeft, 0); // receive the message 
@@ -102,8 +103,9 @@ int main()
 				break;
 			}
 		}
-		clock_t end = clock(); // stop measure time
-		double time= (double)(end - start)/CLOCKS_PER_SEC; // calculating the time to take the file to arrive 
+		struct timeval end; 
+		gettimeofday(&end,0);// stop measure time
+		double time=(end.tv_sec - start.tv_sec)+(end.tv_usec-start.tv_usec)*1e-6; // calculating the time to take the file to arrive 
 		times[CountMessArrive++]=time;
 		TotalTime += time; // add time to total time 
 		if(strcmp(buffer,"exit")==0){ // check if get exit message
@@ -124,7 +126,7 @@ int main()
 		BytesLeft = SizeFile / 2; // intialize how much byte left to received
 		buffer[SizeFile / 2];
 		BytesReceived = 0;// countig how much byte received from sender
-		start = clock(); // start measure time
+		gettimeofday(&start,0); // start measure time
 		while (BytesReceived < SizeFile/2)
 		{
 			int MessRecv = recv(ClientSocket, buffer, BytesLeft, 0); // receive the massage 
@@ -135,15 +137,29 @@ int main()
 				break;
 			}
 		}
-		end = clock();// stop measure time
-		time= (double)(end - start)/CLOCKS_PER_SEC; // calculating the time to take the file to arrive 
+		gettimeofday(&end,0); // stop measure time
+		time=(end.tv_sec - start.tv_sec)+(end.tv_usec-start.tv_usec)*1e-6;  // calculating the time to take the file to arrive 
 		times[CountMessArrive++]=time;
 		TotalTime += time; // add time to total time 
 		printf("Received %ld byte\n\n", BytesReceived);	 // print how much byte arrive the how much time its take  
 		sendauthentication(ClientSocket); // send authentication
-		
-	}
-	CountMessArrive--; // because exit message
+		BytesLeft = 5; // intialize how much byte left to received
+		char buffer2[5];
+		BytesReceived = 0;// countig how much byte received from sender
+		while (BytesReceived < 5)
+		{
+			int MessRecv = recv(ClientSocket, buffer2, BytesLeft, 0); // receive the message 
+			BytesReceived += MessRecv; // add the number of byte that arrive from sender
+			BytesLeft -= MessRecv; // subtraction the number of byte that left to receive
+			if (MessRecv <= 0)
+			{
+				break;
+			}
+		}
+		if(strcmp(buffer2,"exit")==0){ // check if get exit message
+			break;
+		}
+	}	
 	printf("\nexit message arrived\n\n");
 	close(listenSocket); // close socket with sender
 	printf("socket close\n\n");
