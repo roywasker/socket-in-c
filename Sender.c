@@ -32,7 +32,7 @@ int main()
         exit(1);
     }
     
-    char message[SizeFile];
+    char message[SizeFile+1];
 
     fread(message,sizeof(char),SizeFile,fp); // insert the file in to the string
 
@@ -165,9 +165,16 @@ int main()
                 break; // break loop
             }
         }
-        else if (ch2 == 'y')
+        char ExitMess[] = "nxit"; // its mean not exit -> continue
+        BytesSent = send(sock, ExitMess, sizeof(ExitMess), 0); // send continue message to recevier
+        if (BytesSent == -1)
         {
-            continue;
+            printf("Error in sending size of file");
+            exit(1);
+        }
+        else if (BytesSent == 0)
+        {
+            printf("peer has closed the TCP connection prior to send.\n");
         }
     }
     printf("\nclose soket\n"); 
